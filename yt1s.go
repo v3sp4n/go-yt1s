@@ -1,7 +1,7 @@
 package yt1s
 
 import (
-    "fmt"
+    // "fmt"
     // "log"
     "errors"
     "io"
@@ -166,9 +166,6 @@ func download(url, resolution, format string) (error) {
     if err != nil {
         return err
     }
-    err := downloadFromDlink(*dlink,filename,format)
-    if err != nil {
-        return err
-    }
+    downloadFromDlink(*dlink,filename,format)
     return nil
 }
