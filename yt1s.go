@@ -121,6 +121,12 @@ func getK(video, resolution, format string) (*map[string]string, error) {
     if err != nil {
         return nil, err
     }
+    switch format {
+    case "avi":
+        format = "mp4";
+    case "wav":
+        format = "mp3";
+    }
     _,Links__err := j.Links[format][formatv]
     if Links__err == false {
         return nil,errors.New("undefined format/resolution")
@@ -143,9 +149,6 @@ func downloadFromDlink(dlink,filename,format string) (error) {
     if err != nil {
         return err
     }
-    if format != "mp3" {
-        format = "mp4"
-    }
     err = os.WriteFile(filename+"."+format, body, 0644)
     //+
     return nil
@@ -153,7 +156,7 @@ func downloadFromDlink(dlink,filename,format string) (error) {
 
 
 func download(url, resolution, format string) (error) {
-    if format == "mp3" || format == "avi" {
+    if format == "mp3" || format == "wav" {
         resolution = "mp3"
     }
     vid_,err := getK(url, resolution, format)
