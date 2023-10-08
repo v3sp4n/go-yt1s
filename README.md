@@ -22,8 +22,8 @@ import (
 )
 func main() {
     urls := []string{
-        "https://www.youtube.com/watch?v=F5RnAFl_gz0",
-        "https://www.youtube.com/watch?v=OpNNmGs8Xao",
+        "https://www.youtube.com/watch?v=dQw4w9WgXcQ&pp=ygUJcmljayByb2xs",
+        "https://www.youtube.com/watch?v=OedY-kNAxD4&pp=ygULZ29vZnkgc291bmQ%3D",
     }
     for i := range urls{
         q,err := yt1s.GetAvalibleQualites(urls[i])
