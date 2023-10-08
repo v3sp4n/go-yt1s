@@ -1,9 +1,17 @@
+
+download video/music of service `yt1s`
+
 <h1>installing</h1>
 
 > go get github.com/v3sp4n/go-yt1s
- 
+
+<h1>yt1s.</h1>
+
+```go
+error := yt1s.download(url, quality, path string)
+&map[string][]map[string]string,error := yt1s.GetAvalibleQualites(url string)
+```
 <h1>usage</h1>
-<br>
 
 ```go
 package main
@@ -25,4 +33,3 @@ func main() {
     }
 }
 ```
-s
