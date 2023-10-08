@@ -1,3 +1,9 @@
+//shit code..damn!
+
+/*
+error := yt1s.download(url, quality, path string)
+&map[string][]map[string]string,error := yt1s.GetAvalibleQualites(url string)
+*/
 package yt1s
 
 import (
@@ -10,6 +16,17 @@ import (
     "net/url"
     "encoding/json"
 )
+
+type getK__struct struct {
+    Status string
+    Mess string
+    P string
+    Vid string
+    Title string
+    T int
+    A string
+    Links map[string]map[string]map[string]string
+}
 
 func checkStatusInResponse(json_string string) (*bool, *string, error) {
     type json__struct struct {
@@ -28,6 +45,143 @@ func checkStatusInResponse(json_string string) (*bool, *string, error) {
     }
     r := true
     return &r,&j.Mess,nil
+}
+
+func getK__req(video string) (*string,error) {
+    resp, err := http.PostForm("https://yt1s.com/api/ajaxSearch/index", url.Values{
+        "q": {video},
+        // "vt": {formatv},
+    })
+    if err != nil {
+        return nil, err
+    }
+    if resp.StatusCode != 200 {
+        return nil,errors.New("StatusCode != 200!")
+    }
+    defer resp.Body.Close()
+    body, err := io.ReadAll(resp.Body)
+    if err != nil {
+        return nil, err
+    }
+    status,mess,err := checkStatusInResponse(string(body))//check Body.Status "ok"
+    if err != nil || *status == false {
+        if err != nil {
+            return nil,err
+        }
+        return nil,errors.New("body.Status != ok! " + *mess)
+    }
+    sbody := string(body)
+    return &sbody,nil
+}
+
+func getAvalibleQualites(links map[string]map[string]map[string]string) (*map[string][]map[string]string) {
+    res := map[string][]map[string]string{}
+/*
+{
+    "mp4": {
+        {
+            "quality":"720p",
+            "key":"qwerty123....",
+        },
+    },
+}
+*/
+    for f := range links {
+        res[f] = []map[string]string{}
+        for k := range links[f] {
+            res[f] = append(res[f],map[string]string{
+                "quality": links[f][k]["q"],
+                "key_quality": k,
+                "key": links[f][k]["k"],
+                "format": links[f][k]["f"],
+            })
+        }
+    }
+
+    return &res
+}
+func GetAvalibleQualites(url string) (*map[string][]map[string]string,error) {
+    body,err := getK__req(url)
+    if err != nil {
+        return nil,err
+    }
+    j := getK__struct{}
+    err = json.Unmarshal([]byte(*body), &j)
+    if err != nil {
+        return nil, err
+    }
+    res := getAvalibleQualites(j.Links)
+    return res,nil
+}
+
+
+func getK(video, quality/*mp4:140p,240p,...mp3:mp3*/ string) (*map[string]string, error) {
+    resp, err := http.PostForm("https://yt1s.com/api/ajaxSearch/index", url.Values{
+        "q": {video},
+        // "vt": {formatv},
+    })
+    if resp.StatusCode != 200 {
+        return nil,errors.New("StatusCode != 200!")
+    }
+    if err != nil {
+        return nil, err
+    }
+    defer resp.Body.Close()
+    body, err := io.ReadAll(resp.Body)
+    if err != nil {
+        return nil, err
+    }
+    status,mess,err := checkStatusInResponse(string(body))//check Body.Status "ok"
+    if err != nil || *status == false {
+        if err != nil {
+            return nil,err
+        }
+        return nil,errors.New("body.Status != ok! " + *mess)
+    }
+    j := getK__struct{}
+    err = json.Unmarshal([]byte(string(body)), &j)
+    if err != nil {
+        return nil, err
+    }
+    undefined_format := true
+    undefined_format__avalible_qualites := ""
+    qq := getAvalibleQualites(j.Links)
+    q := *qq
+    for f := range q {
+        for i := range q[f] {
+            undefined_format__avalible_qualites = undefined_format__avalible_qualites + q[f][i]["quality"] + " "
+        }
+    }
+    key := ""
+    format := ""
+    if quality == "mp3" {
+        for k := range q["mp3"] {
+            key = q["mp3"][k]["key"]
+            format = q["mp3"][k]["format"]
+            undefined_format = false
+            break
+        }
+    } else {
+        for f := range q {
+            for i := range q[f] {
+                if quality == q[f][i]["quality"] {
+                    key = q[f][i]["key"]
+                    format = q[f][i]["format"]
+                    undefined_format = false
+                }
+            }
+        }
+    }
+    if undefined_format {
+        return nil,errors.New("undefined format/quality. Aavalible format&quality:"+undefined_format__avalible_qualites)
+    }
+    res := map[string]string {
+        "videoname": j.Title,
+        "videoid": j.Vid,
+        "key": key,
+        "format": format, 
+    }
+    return &res, nil
 }
 
 func getDlink(vid,k string) (*string, error) {
@@ -70,74 +224,6 @@ func getDlink(vid,k string) (*string, error) {
     }
     return &j.Dlink,nil
 }
-func getK(video, resolution, format string) (*map[string]string, error) {
-    type getK__struct struct {
-        Status string
-        Mess string
-        P string
-        Vid string
-        Title string
-        T int
-        A string
-        Links map[string]map[string]map[string]string
-    }
-    formats := map[string]string {
-        "1080p": "137",
-        "720p": "22",
-        "480p": "135",
-        "360p": "18",
-        "240p": "133",
-        "144p": "160",
-        "mp3": "mp3128",
-    }
-    formatv,formatb := formats[resolution]
-    if formatb == false {
-        return nil,errors.New("undefined format(mp3/mp4(1080p,720p,480p,360p,240p,144p))")
-    }
-    resp, err := http.PostForm("https://yt1s.com/api/ajaxSearch/index", url.Values{
-        "q": {video},
-        "vt": {formatv},
-    })
-    if resp.StatusCode != 200 {
-        return nil,errors.New("StatusCode != 200!")
-    }
-    if err != nil {
-        return nil, err
-    }
-    defer resp.Body.Close()
-    body, err := io.ReadAll(resp.Body)
-    if err != nil {
-        return nil, err
-    }
-    status,mess,err := checkStatusInResponse(string(body))//check Body.Status "ok"
-    if err != nil || *status == false {
-        if err != nil {
-            return nil,err
-        }
-        return nil,errors.New("body.Status != ok! " + *mess)
-    }
-    j := getK__struct{}
-    err = json.Unmarshal([]byte(string(body)), &j)
-    if err != nil {
-        return nil, err
-    }
-    switch format {
-    case "avi":
-        format = "mp4";
-    case "wav":
-        format = "mp3";
-    }
-    _,Links__err := j.Links[format][formatv]
-    if Links__err == false {
-        return nil,errors.New("undefined format/resolution")
-    }
-    res := map[string]string {
-        "videoname": j.Title,
-        "videoid": j.Vid,
-        "key": j.Links[format][formatv]["k"],
-    }
-    return &res, nil
-}
 
 func downloadFromDlink(dlink,filename,format string) (error) {
     res,err := http.Get(dlink)
@@ -155,20 +241,17 @@ func downloadFromDlink(dlink,filename,format string) (error) {
 }
 
 
-func Download(url, resolution, format string) (error) {
-    if format == "mp3" || format == "wav" {
-        resolution = "mp3"
-    }
-    vid_,err := getK(url, resolution, format)
+func Download(url, resolution, path string) (error) {
+    aVid,err := getK(url, resolution)
     if err != nil {
         return err
     }
-    vid := *vid_
+    vid := *aVid
     filename := vid["videoname"]
     dlink,err := getDlink(vid["videoid"],vid["key"])
     if err != nil {
         return err
     }
-    downloadFromDlink(*dlink,filename,format)
+    downloadFromDlink(*dlink,path+filename,vid["format"])
     return nil
 }

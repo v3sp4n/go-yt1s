@@ -1,3 +1,3 @@
-module github.com/v3sp4n/go-yt1s
+module test
 
-go 1.18
+go 1.21.2
