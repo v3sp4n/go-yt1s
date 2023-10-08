@@ -23,12 +23,12 @@ import (
 func main() {
     urls := []string{
         "https://www.youtube.com/watch?v=dQw4w9WgXcQ&pp=ygUJcmljayByb2xs",
-        "https://www.youtube.com/watch?v=OedY-kNAxD4&pp=ygULZ29vZnkgc291bmQ%3D",
+        "https://youtu.be/OjNpRbNdR7E?si=YPqMT79475UfM4PM",
     }
-    for i := range urls{
+    for i := 0; i < len(urls); i++ {
         q,err := yt1s.GetAvalibleQualites(urls[i])
         fmt.Println("avalible qualites for",urls[i],q,err)
-        err2 := yt1s.Download(urls[0],"720p"/*want audio?put"mp3"*/,"/home/vespan/Desktop/")
+        err2 := yt1s.Download(urls[0],"720p","/home/vespan/Desktop/")
         fmt.Println(err2)
     }
 }
