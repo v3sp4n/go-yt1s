@@ -28,7 +28,7 @@ func main() {
     for i := range urls{
         q,err := yt1s.GetAvalibleQualites(urls[i])
         fmt.Println("avalible qualites for",urls[i],q,err)
-        err2 := yt1s.Download(urls[0],"720p/*audio?put"mp3"*/","/home/vespan/Desktop/")
+        err2 := yt1s.Download(urls[0],"720p"/*want audio?put"mp3"*/,"/home/vespan/Desktop/")
         fmt.Println(err2)
     }
 }
