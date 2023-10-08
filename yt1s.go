@@ -155,7 +155,7 @@ func downloadFromDlink(dlink,filename,format string) (error) {
 }
 
 
-func download(url, resolution, format string) (error) {
+func Download(url, resolution, format string) (error) {
     if format == "mp3" || format == "wav" {
         resolution = "mp3"
     }
