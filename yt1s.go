@@ -114,32 +114,13 @@ func GetAvalibleQualites(url string) (*map[string][]map[string]string,error) {
     return res,nil
 }
 
-
 func getK(video, quality/*mp4:140p,240p,...mp3:mp3*/ string) (*map[string]string, error) {
-    resp, err := http.PostForm("https://yt1s.com/api/ajaxSearch/index", url.Values{
-        "q": {video},
-        // "vt": {formatv},
-    })
-    if resp.StatusCode != 200 {
-        return nil,errors.New("StatusCode != 200!")
-    }
+    body,err := getK__req(video)
     if err != nil {
-        return nil, err
-    }
-    defer resp.Body.Close()
-    body, err := io.ReadAll(resp.Body)
-    if err != nil {
-        return nil, err
-    }
-    status,mess,err := checkStatusInResponse(string(body))//check Body.Status "ok"
-    if err != nil || *status == false {
-        if err != nil {
-            return nil,err
-        }
-        return nil,errors.New("body.Status != ok! " + *mess)
+        return nil,err
     }
     j := getK__struct{}
-    err = json.Unmarshal([]byte(string(body)), &j)
+    err = json.Unmarshal([]byte(string(*body)), &j)
     if err != nil {
         return nil, err
     }
